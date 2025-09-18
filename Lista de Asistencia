@@ -1,0 +1,12 @@
+typedef struct
+{
+  int clave;
+  char *nombre;
+}Alumno;
+
+typedef struct Nodo
+{
+  Alumno al;
+  int *as;
+  struct Nodo *sig;
+}Asistencia;
