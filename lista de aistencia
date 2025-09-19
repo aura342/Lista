@@ -1,0 +1,119 @@
+#include <stdio.h>
+
+typedef struct
+{
+	int clave;
+	char *nombre;
+}Alumno;
+
+typedef struct Aistencia
+{
+	Alumno al;
+	int *asistio;
+	char **fecha; 
+	struct Asistencia *sig;
+}Asistencia;
+
+int main()
+{
+	int op, clave;
+	Asistencia cabeza;
+	char nombre;
+	do
+	{
+		printf("-----MENU------");
+		printf("\n1. Agregar alumno\n2. Eliminar alumno\n3. Tomar Asistencia\n4. Mostrar Alumnos\n5. Salir");
+		printf("Seleccinar una opcion: ");
+		scanf("%d", &op);
+		switch(op)
+		case 1:
+			printf("Insertar la clave del alumno: ");
+			scanf("%d", &clave);
+			printf("Insertar el nombre del alumno: ");
+			scanf("%d", nombre);
+			insertaInicio(cabeza,clave, nombre);
+			break;
+		case 2: 
+			printf("Insertar la clave del alumno a eliminar: ");
+			scanf("%d", &clave);
+			eliminar(cabeza, clave);
+			break;
+		case 3: 
+			printf("----LISTA DE ASISTENCIA----");
+			tomarAsistencia(cabeza);
+			break;
+		case 4: 
+			printf("----LISTA DE ASISTENCIA----");
+			mostrarAlumnos();
+			break;
+	} while(op!=5);
+	
+}
+
+Asistencia *creaNodo(int cl, char *nom)
+{
+	Asistencia *nuevo=(Asistencia*) malloc(sizeof(Asistencia));
+	if(nuevo!=NULL)
+	{
+		nuevo->al.clave=cl;
+		nuevo->al.nombre=nom;
+		nuevo->sig=NULL;
+	}
+	return(nuevo);
+}
+
+void insertaInicio(Asistencia *c, int cl, char *nom)
+{
+	Asistencia *nuevo=creaNodo(cl, nom);
+	if(*c==NULL)
+		*c=nuevo;
+	else
+	{
+		nuevo->sig=*c;
+		*c=nuevo;
+	}
+}
+
+
+void eliminar(Asistencia *c, int cl)
+{
+	Asistencia *ant, *corre;
+	if(*c!=NULL)
+	{
+		corre=*c;
+		if(corre->al.clave==cl)
+		{
+			*c=corre->sig;
+			free(corre);
+		}
+		else
+		{
+			while(corre!=NULL && corre->al =cl)
+			{
+				ant=corre;
+				corre=corre->sig;
+			}
+			if(corre!=NULL)
+			{
+				ant->sig=corre->sig;
+				free(corre);	
+			}
+			
+		}
+	}
+}
+
+void tomarAsistencia(Asistencia *c)
+{
+	if(c!=NULL)
+	{
+		int i=0, j=0;
+		printf("|Clave: %d | Nombre: %s |\n"c->al.clave, c->al.nombre);
+		printf("|Fecha: |");
+		scanf("%s", c->(fecha+i)); 
+		printf("|Asitencia: |");
+		scanf("%d", c->(asistio+i)+j);
+		i++;
+		j++;
+	}
+}
