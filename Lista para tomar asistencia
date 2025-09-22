@@ -1,0 +1,159 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+typedef struct
+{
+	int clave;
+	char *nombre;
+}Alumno;
+
+typedef struct Asistencia
+{
+	Alumno al;
+	int *asistio;
+	char **fecha; 
+	int ndias;
+	int maxDias;
+	struct Asistencia *sig;
+}Asistencia;
+
+Asistencia *creaNodo(int cl, char *nom, int maxDias);
+void insertaInicio(Asistencia **c, int cl, char *nom, int maxDias);
+void eliminar(Asistencia **c, int cl);
+void tomarAsistencia(Asistencia *c);
+void mostrarAlumnos(Asistencia *c);
+
+int main()
+{
+	int op, clave;
+	Asistencia *cabeza=NULL;
+	int maxDias=31;
+	char *nombre;
+	nombre=(char*) malloc(50 * sizeof(char));
+	do
+	{
+		printf("\n------MENU-------");
+		printf("\n1. Agregar alumno\n2. Eliminar alumno\n3. Tomar Asistencia\n4. Mostrar Alumnos\n5. Salir\n");
+		printf("Seleccinar una opcion: ");
+		scanf("%d", &op);
+		switch(op)
+		{
+			case 1:
+				printf("\n");
+				printf("Insertar la clave del alumno: ");
+				scanf("%d", &clave);
+				printf("Insertar el nombre del alumno: ");
+				scanf("%s", nombre);
+				insertaInicio(&cabeza,clave, nombre, maxDias);
+				break;
+			case 2: 
+				printf("Insertar la clave del alumno a eliminar: ");
+				scanf("%d", &clave);
+				eliminar(&cabeza, clave);
+				break;
+			case 3: 
+				printf("\n----TOMAR ASISTENCIA----\n");
+				tomarAsistencia(cabeza);
+				break;
+			case 4: 
+				printf("\n----LISTA DE ASISTENCIA----\n");
+				mostrarAlumnos(cabeza);
+				break;
+			case 5: 
+				printf("\nSaliendo...........");
+				break;
+			
+		}
+	} while(op!=5);
+	
+}
+
+Asistencia *creaNodo(int cl, char *nom, int maxDias)
+{
+	Asistencia *nuevo=(Asistencia*) malloc(sizeof(Asistencia));
+	if(nuevo!=NULL)
+	{
+		nuevo->al.clave=cl;
+		nuevo->al.nombre = (char*)malloc(strlen(nom)+1);
+		strcpy(nuevo->al.nombre,nom);
+		nuevo->ndias = 0;
+		nuevo->maxDias = maxDias;
+		nuevo->asistio = (int*) malloc(maxDias * sizeof(int));
+		nuevo->fecha = (char**) malloc(maxDias * sizeof(char*));
+		for(int i=0; i<maxDias; i++)
+			*(nuevo->fecha + i) = (char*) malloc(11);
+		nuevo->sig=NULL;
+	}
+	return(nuevo);
+}
+
+void insertaInicio(Asistencia **c, int cl, char *nom, int maxDias)
+{
+	Asistencia *nuevo=creaNodo(cl, nom, maxDias);
+	if(*c==NULL)
+		*c=nuevo;
+	else
+	{
+		nuevo->sig=*c;
+		*c=nuevo;
+	}
+}
+
+
+void eliminar(Asistencia **c, int cl)
+{
+	Asistencia *ant=NULL, *corre=*c;
+	while(corre!=NULL)
+	{
+		if(corre->al.clave==cl)
+		{
+			if(ant==NULL)
+				*c=corre->sig;
+		}
+		else
+		   ant->sig = corre->sig;
+		
+		free(corre->al.nombre);
+		for(int i=0; i<corre->maxDias; i++)
+			free(*(corre->fecha + i));
+		free(corre->fecha);
+		free(corre->asistio);
+		free(corre);
+		return;
+	}
+	ant = corre;
+	corre = corre->sig;
+}
+
+void tomarAsistencia(Asistencia *c)
+{
+	Asistencia *actual = c;
+	while(actual!=NULL)
+	{
+		int dia=actual->ndias;
+		if(dia >= actual->maxDias)
+			printf("Se alcanzo el limite de dias");
+		int i=0, j=0;
+		printf("|Clave: %d | Nombre: %s |\n",actual->al.clave, actual->al.nombre);
+		printf("|Fecha(dd/mm/aaaa): ");
+		scanf("%s", *(actual->fecha+dia));
+		printf("|Asitencia(1-Si, 0-No): ");
+		scanf("%d", actual->asistio+dia);
+		actual->ndias++;
+		actual = actual->sig;
+	}
+}
+
+void mostrarAlumnos(Asistencia *c)
+{
+	Asistencia *actual = c;
+	while(actual!=NULL)
+	{
+		printf("| Clave: %d | Nombre: %s ",actual->al.clave, actual->al.nombre);
+		for(int i=0; i<actual->ndias; i++)
+			printf("| Fecha: %s | Asitencia:  %d|\n",*(actual->fecha+i), *(actual->asistio+i));
+		printf("----------------------------------------------------------------------\n");
+		actual = actual->sig;
+	}
+}
