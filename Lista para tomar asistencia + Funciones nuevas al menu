@@ -1,0 +1,242 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+typedef struct
+{
+	int clave;
+	char *nombre;
+}Alumno;
+
+typedef struct Asistencia
+{
+	Alumno al;
+	int *asistio;
+	char **fecha; 
+	int ndias;
+	int maxDias;
+	struct Asistencia *sig;
+}Asistencia;
+
+Asistencia *creaNodo(int cl, char *nom, int maxDias);
+void insertaInicio(Asistencia **c, int cl, char *nom, int maxDias);
+void eliminar(Asistencia **c, int cl);
+void tomarAsistencia(Asistencia *c);
+void mostrarAlumnos(Asistencia *c);
+
+// Funciones nuevas:
+void ordenarAlfabeticamente(Asistencia **c);
+void mostrarTodasAsistencias(Asistencia *c);
+
+int main()
+{
+	int op, clave;
+	Asistencia *cabeza=NULL;
+	int maxDias=31;
+	char *nombre;
+	nombre=(char*) malloc(50 * sizeof(char));
+	do
+	{
+		printf("\n------MENU-------");
+		printf("\n1. Agregar alumno\n2. Eliminar alumno\n3. Tomar Asistencia\n4. Mostrar Alumnos\n5. Ordenar Alumnos Alfabeticamente\n6. Mostrar Todas las Asistencias\n7. Salir\n");
+		printf("Seleccinar una opcion: ");
+		scanf("%d", &op);
+		switch(op)
+		{
+			case 1:
+				printf("\n");
+				printf("Insertar la clave del alumno: ");
+				scanf("%d", &clave);
+				printf("Insertar el nombre del alumno: ");
+				scanf("%s", nombre);
+				insertaInicio(&cabeza,clave, nombre, maxDias);
+				break;
+			case 2: 
+				printf("Insertar la clave del alumno a eliminar: ");
+				scanf("%d", &clave);
+				eliminar(&cabeza, clave);
+				break;
+			case 3: 
+				printf("\n----TOMAR ASISTENCIA----\n");
+				tomarAsistencia(cabeza);
+				break;
+			case 4: 
+				printf("\n----LISTA DE ASISTENCIA----\n");
+				mostrarAlumnos(cabeza);
+				break;
+			// Opciones nuevas :
+			case 5:
+				printf("\n----ORDENAR ALUMNOS----\n");
+				ordenarAlfabeticamente(&cabeza);
+				break;
+			case 6:
+				printf("\n----TODAS LAS ASISTENCIAS----\n");
+				mostrarTodasAsistencias(cabeza);
+				break;
+			case 7: 
+				printf("\nSaliendo...........");
+				break;
+		}
+	} while(op!=7);
+	
+}
+
+Asistencia *creaNodo(int cl, char *nom, int maxDias)
+{
+	Asistencia *nuevo=(Asistencia*) malloc(sizeof(Asistencia));
+	if(nuevo!=NULL)
+	{
+		nuevo->al.clave=cl;
+		nuevo->al.nombre = (char*)malloc(strlen(nom)+1);
+		strcpy(nuevo->al.nombre,nom);
+		nuevo->ndias = 0;
+		nuevo->maxDias = maxDias;
+		nuevo->asistio = (int*) malloc(maxDias * sizeof(int));
+		nuevo->fecha = (char**) malloc(maxDias * sizeof(char*));
+		for(int i=0; i<maxDias; i++)
+			*(nuevo->fecha + i) = (char*) malloc(11);
+		nuevo->sig=NULL;
+	}
+	return(nuevo);
+}
+
+void insertaInicio(Asistencia **c, int cl, char *nom, int maxDias)
+{
+	Asistencia *nuevo=creaNodo(cl, nom, maxDias);
+	if(*c==NULL)
+		*c=nuevo;
+	else
+	{
+		nuevo->sig=*c;
+		*c=nuevo;
+	}
+}
+
+void eliminar(Asistencia **c, int cl)
+{
+	Asistencia *ant=NULL, *corre=*c;
+	while(corre!=NULL)
+	{
+		if(corre->al.clave==cl)
+		{
+			if(ant==NULL)
+				*c=corre->sig;
+			else
+				ant->sig = corre->sig;
+		
+			free(corre->al.nombre);
+			for(int i=0; i<corre->maxDias; i++)
+				free(*(corre->fecha + i));
+			free(corre->fecha);
+			free(corre->asistio);
+			free(corre);
+			return;
+		}
+		ant = corre;
+		corre = corre->sig;
+	}
+}
+
+void tomarAsistencia(Asistencia *c)
+{
+	Asistencia *actual = c;
+	while(actual!=NULL)
+	{
+		int dia=actual->ndias;
+		if(dia >= actual->maxDias)
+		{
+			printf("Se alcanzo el limite de dias");
+			actual=actual->sig;
+			continue;
+		}
+		printf("|Clave: %d | Nombre: %s |\n",actual->al.clave, actual->al.nombre);
+		printf("|Fecha(dd/mm/aaaa): ");
+		scanf("%s", *(actual->fecha+dia));
+		printf("|Asitencia(1-Si, 0-No): ");
+		scanf("%d", actual->asistio+dia);
+		actual->ndias++;
+		actual = actual->sig;
+	}
+}
+
+void mostrarAlumnos(Asistencia *c)
+{
+	Asistencia *actual = c;
+	while(actual!=NULL)
+	{
+		printf("| Clave: %d | Nombre: %s ",actual->al.clave, actual->al.nombre);
+		for(int i=0; i<actual->ndias; i++)
+			printf("| Fecha: %s | Asitencia:  %d|\n",*(actual->fecha+i), *(actual->asistio+i));
+		printf("----------------------------------------------------------------------\n");
+		actual = actual->sig;
+	}
+}
+
+//agregar funcion de eliminar alumno (al menu y al codigo) 
+//agregar funcion de ordenar alfabeticamente (al menu y al codigo) 
+//agregar funcion de mostrar todas las asistencias (al menu y al codigo)
+
+// Funciones nuevas añadidas al codigo:
+void ordenarAlfabeticamente(Asistencia **c)
+{
+	if(*c==NULL || (*c)->sig==NULL)
+		return;
+	Asistencia *i, *j;
+	char *tempNom;
+	int tempClave;
+	int *tempAsistio;
+	char **tempFecha;
+	int tempNdias, tempMaxDias;
+
+	for(i=*c; i!=NULL; i=i->sig)
+	{
+		for(j=i->sig; j!=NULL; j=j->sig)
+		{
+			if(strcmp(i->al.nombre, j->al.nombre) > 0)
+			{
+				// Intercambio de datos
+				tempNom=i->al.nombre; 
+				i->al.nombre=j->al.nombre; 
+				j->al.nombre=tempNom;
+				
+				tempClave=i->al.clave; 
+				i->al.clave=j->al.clave; 
+				j->al.clave=tempClave;
+
+				tempAsistio=i->asistio; 
+				i->asistio=j->asistio; 
+				j->asistio=tempAsistio;
+				
+				tempFecha=i->fecha; 
+				i->fecha=j->fecha; 
+				j->fecha=tempFecha;
+				
+				tempNdias=i->ndias; 
+				i->ndias=j->ndias; 
+				j->ndias=tempNdias;
+				
+				tempMaxDias=i->maxDias; 
+				i->maxDias=j->maxDias; 
+				j->maxDias=tempMaxDias;
+			}
+		}
+	}
+	printf("Alumnos ordenados alfabeticamente.\n");
+}
+
+void mostrarTodasAsistencias(Asistencia *c)
+{
+	Asistencia *actual=c;
+	while(actual!=NULL)
+	{
+		printf("\nAlumno: %s (Clave: %d)\n", actual->al.nombre, actual->al.clave);
+		if(actual->ndias==0)
+			printf("   No tiene registros de asistencia.\n");
+		else
+		{
+			for(int i=0; i<actual->ndias; i++)
+				printf("   Fecha: %s | Asistencia: %d\n", *(actual->fecha+i), *(actual->asistio+i));
+		}
+		actual=actual->sig;
+	}
+}
